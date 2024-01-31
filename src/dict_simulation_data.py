@@ -3,17 +3,17 @@ import os
 import pandas as pd
 import numpy as np
 
-from GENE_sim_reader.src.utils.file_functions import suffix_from_filename, string_to_list, switch_suffix_file
-from GENE_sim_reader.src.utils.find_buried_filetypes import find_buried_filetypes
+from GENE_sim_tools.src.utils.file_functions import suffix_from_filename, string_to_list, switch_suffix_file
+from GENE_sim_tools.src.utils.find_buried_filetypes import find_buried_filetypes
 
-from GENE_sim_reader.src.dict_parameters_data import parameters_filepath_to_dict, create_species_tuple
-from GENE_sim_reader.src.dict_omega_data import omega_filepath_to_dict, convergence_check
-from GENE_sim_reader.src.dict_nrg_data import nrg_filepath_to_dict
-from GENE_sim_reader.src.dict_field_data import field_filepath_to_dict
+from GENE_sim_tools.src.dict_parameters_data import parameters_filepath_to_dict, create_species_tuple
+from GENE_sim_tools.src.dict_omega_data import omega_filepath_to_dict, convergence_check
+from GENE_sim_tools.src.dict_nrg_data import nrg_filepath_to_dict
+from GENE_sim_tools.src.dict_field_data import field_filepath_to_dict
 
-from GENE_sim_reader.src.filetype_key_lists import load_criteria_per_dict, simulation_key_list, time_quantities_from_criteria_list, remove_non_numerical_crit
-from GENE_sim_reader.src.criteria_code.criteria_parser import multi_criteria_to_list
-from GENE_sim_reader.src.criteria_code.criteria_checker import dict_criteria_check, criteria_array_sifter
+from GENE_sim_tools.src.filetype_key_lists import load_criteria_per_dict, simulation_key_list, time_quantities_from_criteria_list, remove_non_numerical_crit
+from GENE_sim_tools.src.criteria_code.criteria_parser import multi_criteria_to_list
+from GENE_sim_tools.src.criteria_code.criteria_checker import dict_criteria_check, criteria_array_sifter
 
 
 
