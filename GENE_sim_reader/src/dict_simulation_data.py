@@ -177,7 +177,24 @@ def create_sim_dict(parameter_filepath:str, criteria_list:list, load_spec='all')
 
 
     if 'field' in list(criteria_per_dict.keys()):
-        pass
+        
+        time_criteria, field_quantities = time_quantities_from_criteria_list(criteria_per_dict['field'], parameter_dict, 'field')
+
+        criteria_per_dict['field'] = remove_non_numerical_crit(criteria_per_dict['field'])
+
+        field_filepath = switch_suffix_file(parameter_filepath, 'field')
+        field_dict = field_filepath_to_dict(field_filepath, time_criteria, field_quantities)
+
+        # nrg_dict = criteria_array_sifter(criteria_per_dict['nrg'], nrg_dict)
+        add_simulation = dict_criteria_check(criteria_per_dict['field'], field_dict)
+
+        if add_simulation == True:
+            simulation_dict['field'] = field_dict
+        else:
+            return False, criteria_per_dict
+
+
+
 
     return simulation_dict, criteria_per_dict
 

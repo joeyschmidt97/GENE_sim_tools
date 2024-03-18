@@ -29,7 +29,7 @@ nrg_key_list = nrg_extra_keys + nrg_column_keys
 ### FIELD KEY LIST
 
 field_extra_keys = ['time']
-field_column_keys = ['phi', 'apar', 'bpar']
+field_column_keys = ['field_phi', 'field_apar', 'field_bpar']
 field_key_list = field_extra_keys + field_column_keys
 
 
