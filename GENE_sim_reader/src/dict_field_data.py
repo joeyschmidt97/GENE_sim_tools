@@ -131,13 +131,17 @@ def create_field_dict(field_filepath:str, time_criteria='all', field_quantities=
                 # calculate offset in field file to retrieve said data
                 offset = timeentry_size + time_index * (timeentry_size + leapfld) + ind * (
                             entrysize + 2 * intsize) + intsize
+
                 file.seek(offset)
 
                 data_array = np.fromfile(file, count=nx * ny * nz, dtype=complex_dtype).reshape(nz, ny, nx)
 
-                # Appending reshaped field data into field dict
+                # Appending field data into field dict
                 field_dict.setdefault(field_name, []).append(data_array)
 
     field_dict['filepath'] = field_filepath
     field_dict['key_list'] = field_key_list
     return field_dict
+
+
+

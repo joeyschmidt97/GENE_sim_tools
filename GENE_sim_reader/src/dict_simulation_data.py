@@ -283,102 +283,44 @@ def sim_filepath_to_df(filepath_list, criteria_list=[], load_spec='all'):
 
 
 
-
-
-# #------------------------------------------------------------------------------------------------
-# # Function to check if the simulations meet the specified criteria-------------------------------
-# #------------------------------------------------------------------------------------------------
-
-# def all_criteria_checker(simulation_dict:dict, criteria_dict_list:list, debug:bool = False):
-#     """
-#     Checks if a simulation dictionary meets all the specified criteria.
-    
-#     This function iterates through the keys of the simulation dictionary and checks
-#     if the associated sub-dictionaries meet the criteria provided in criteria_dict_list.
-#     It ensures that every criterion is satisfied by at least one sub-dictionary.
-    
-#     Parameters:
-#     - simulation_dict (dict): A dictionary containing simulation information.
-#     - criteria_dict_list (list): A list of dictionaries, each dict specifying a criterion.
-#     - debug (bool): A flag for printing debug information. Default is False.
-    
-#     Returns:
-#     - bool: True if all criteria are met, otherwise False.
-#     """
-
-    
-#     # Debug printouts for input data
-#     if debug:
-#         print(criteria_dict_list)
-#         print(simulation_dict['filepath'], simulation_dict['suffix'], simulation_dict.keys())
-
-#     # Initialize a list to keep track of which criteria have been met
-#     global_crit_check = [0] * len(criteria_dict_list)
-
-#     # Iterate over keys of the simulation dictionary
-#     for key_name in simulation_dict.keys():
-#         dict_to_check = simulation_dict[key_name]
-
-        
-        
-#         # If the current key points to a dictionary, check its criteria
-#         if isinstance(dict_to_check, dict):
-#             dict_crit_pass_list = criteria_dict_checker(criteria_dict_list, global_crit_check, dict_to_check, debug)
-            
-#             # Update the global criteria checklist
-#             global_crit_check = [x + y > 0 for x, y in zip(global_crit_check, dict_crit_pass_list)]
-
-#             # Debug printouts for current checks
-#             if debug: 
-#                 print(dict_crit_pass_list)
-#                 print('--------------------')
-
-#     # Determine if all criteria were met
-#     if False in global_crit_check:
-#         passed_all_criteria = False
-#     else: 
-#         passed_all_criteria = True
-
-#     # Debug printouts for the final results
-#     if debug: 
-#         print('global criteria check:', global_crit_check)
-#         print('all criteria passed:', passed_all_criteria)
-#         print('////////////////////')
-
-#     return passed_all_criteria
-
 # #------------------------------------------------------------------------------------------------
 # # Function to printout specific simulation data--------------------------------------------------
 # #------------------------------------------------------------------------------------------------
 
+def criteria_smart_appender(input_crit, default_criteria_values):
+    """
+    Appends missing default criteria values to the input criteria list, ensuring that all default criteria
+    are present. It prevents duplication by checking if each default criterion is already included in the
+    input criteria before appending.
+
+    Parameters:
+    - input_crit (str or list): A string (or list) representing the input criteria
+    - default_criteria_values (list): A list of default criteria values that will be added if they are not input values
+
+    Returns:
+    - list: A list of criteria that combines the original input criteria with default criteria that is required
+
+    Example Usage:
+    default_criteria = ["gamma", "omega", "status==CONVERGED"]
+    user_criteria = ["gamma>10"]
+
+    updated_criteria = criteria_smart_appender(user_criteria, default_criteria)
+    print(updated_criteria)
+    # Output: ["gamma>10", "omega", "status==CONVERGED"]
+    """
+
+    input_crit = string_to_list(input_crit)
+    modified_input_crit = input_crit.copy()
+
+    for check_val in default_criteria_values:
+        if not any(check_val in criteria for criteria in input_crit):
+            modified_input_crit.append(check_val)
+
+    return modified_input_crit
 
 
 
 
-# def load_simulation_filepath(simulation_dict:dict, filetype:str) -> str:
-#     """
-#     Searches for a file with the specified filetype within a dictionary of simulation file paths 
-#     and returns its path if found.
-
-#     Parameters:
-#     - simulation_dict (dict): Dictionary containing a key 'simulation_filepaths' that maps to a list of file paths.
-#     - filetype (str): Type of file to search for within the filepaths (e.g., 'omega' or 'nrg').
-
-#     Returns:
-#     - str: File path of the file with the specified type. None if not found.
-#     """
-    
-#     # Extract the list of simulation file paths from the dictionary.
-#     simulation_filepaths = simulation_dict['simulation_filepaths']
-
-#     # Iterate through the file paths.
-#     for filepath in simulation_filepaths:
-#         # Extract the filename from the filename. (i.e. 'omega_0003')
-#         filename = os.path.basename(filepath)
-
-#         # If the filename contains the specified filetype, return its path. (if 'omega' in 'omega_0003')
-#         if filetype in filename:
-#             return filepath
 
 # #------------------------------------------------------------------------------------------------
 # #------------------------------------------------------------------------------------------------
