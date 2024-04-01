@@ -6,6 +6,7 @@ from GENE_sim_tools.GENE_sim_reader.src.utils.find_buried_filetypes import find_
 
 from GENE_sim_tools.GENE_sim_reader.src.dict_parameters_data import parameters_filepath_to_dict
 from GENE_sim_tools.GENE_sim_reader.src.dict_omega_data import omega_filepath_to_dict
+from GENE_sim_tools.GENE_sim_reader.src.dict_nrg_data import nrg_filepath_to_dict
 
 
 
@@ -26,10 +27,16 @@ def filepath_to_sim_xarray(input_filepath):
         omega_path = switch_suffix_file(parameters_path, 'omega')
         omega_dict = omega_filepath_to_dict(omega_path)
 
+        nrg_path = switch_suffix_file(parameters_path, 'nrg')
+        time_criteria = {'bounds': 'last'}
+        nrg_dict = nrg_filepath_to_dict(nrg_path, time_criteria='time==last')
 
+
+        
 
         sim_dict = parameters_dict.copy()  # Start with a copy of the first dictionary to avoid modifying it directly
         sim_dict.update(omega_dict)
+        sim_dict.update(nrg_dict)
 
         simulations_xarray.append(sim_dict)
         

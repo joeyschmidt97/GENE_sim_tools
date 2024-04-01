@@ -1,6 +1,6 @@
 import os
 
-from GENE_sim_tools.GENE_sim_reader.ARCHIVE.src.utils.file_functions import string_to_list, file_checks
+from GENE_sim_tools.GENE_sim_reader.ARCHIVE.src_V1.utils.file_functions import string_to_list, file_checks
 
 
 def count_files_in_dir(directory: str, filetype: str) -> int:

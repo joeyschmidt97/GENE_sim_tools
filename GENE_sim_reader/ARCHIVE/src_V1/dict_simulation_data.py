@@ -3,17 +3,17 @@ import os
 import pandas as pd
 import numpy as np
 
-from GENE_sim_tools.GENE_sim_reader.ARCHIVE.src.utils.file_functions import suffix_from_filename, string_to_list, switch_suffix_file
-from GENE_sim_tools.GENE_sim_reader.ARCHIVE.src.utils.find_buried_filetypes import find_buried_filetypes
+from GENE_sim_tools.GENE_sim_reader.ARCHIVE.src_V1.utils.file_functions import suffix_from_filename, string_to_list, switch_suffix_file
+from GENE_sim_tools.GENE_sim_reader.ARCHIVE.src_V1.utils.find_buried_filetypes import find_buried_filetypes
 
-from GENE_sim_tools.GENE_sim_reader.ARCHIVE.src.dict_parameters_data import parameters_filepath_to_dict, create_species_tuple
-from GENE_sim_tools.GENE_sim_reader.ARCHIVE.src.dict_omega_data import omega_filepath_to_dict, convergence_check
-from GENE_sim_tools.GENE_sim_reader.ARCHIVE.src.dict_nrg_data import nrg_filepath_to_dict
-from GENE_sim_tools.GENE_sim_reader.ARCHIVE.src.dict_field_data import field_filepath_to_dict
+from GENE_sim_tools.GENE_sim_reader.ARCHIVE.src_V1.dict_parameters_data import parameters_filepath_to_dict, create_species_tuple
+from GENE_sim_tools.GENE_sim_reader.ARCHIVE.src_V1.dict_omega_data import omega_filepath_to_dict, convergence_check
+from GENE_sim_tools.GENE_sim_reader.ARCHIVE.src_V1.dict_nrg_data import nrg_filepath_to_dict
+from GENE_sim_tools.GENE_sim_reader.ARCHIVE.src_V1.dict_field_data import field_filepath_to_dict
 
-from GENE_sim_tools.GENE_sim_reader.ARCHIVE.src.filetype_key_lists import load_criteria_per_dict, simulation_key_list, time_quantities_from_criteria_list, remove_non_numerical_crit
-from GENE_sim_tools.GENE_sim_reader.ARCHIVE.src.criteria_code.criteria_parser import multi_criteria_to_list
-from GENE_sim_tools.GENE_sim_reader.ARCHIVE.src.criteria_code.criteria_checker import dict_criteria_check, criteria_array_sifter
+from GENE_sim_tools.GENE_sim_reader.ARCHIVE.src_V1.filetype_key_lists import load_criteria_per_dict, simulation_key_list, time_quantities_from_criteria_list, remove_non_numerical_crit
+from GENE_sim_tools.GENE_sim_reader.ARCHIVE.src_V1.criteria_code.criteria_parser import multi_criteria_to_list
+from GENE_sim_tools.GENE_sim_reader.ARCHIVE.src_V1.criteria_code.criteria_checker import dict_criteria_check, criteria_array_sifter
 
 
 
@@ -161,7 +161,7 @@ def create_sim_dict(parameter_filepath:str, criteria_list:list, load_spec='all')
     if 'nrg' in list(criteria_per_dict.keys()):
 
         time_criteria, nrg_quantities = time_quantities_from_criteria_list(criteria_per_dict['nrg'], parameter_dict, 'nrg')
-
+        print(time_criteria)
         criteria_per_dict['nrg'] = remove_non_numerical_crit(criteria_per_dict['nrg'])
 
         nrg_filepath = switch_suffix_file(parameter_filepath, 'nrg')
