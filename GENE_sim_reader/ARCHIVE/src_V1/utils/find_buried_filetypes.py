@@ -1,6 +1,6 @@
 import os
 
-from GENE_sim_tools.GENE_sim_reader.src.utils.file_functions import string_to_list, file_checks
+from GENE_sim_tools.GENE_sim_reader.ARCHIVE.src.utils.file_functions import string_to_list, file_checks
 
 
 def count_files_in_dir(directory: str, filetype: str) -> int:
@@ -36,7 +36,7 @@ def count_files_in_dir(directory: str, filetype: str) -> int:
 
 
 
-def find_buried_filetypes(input_filepath, filetype: str='parameters', max_depth: int = 3):
+def find_buried_filetypes(input_filepath, filetype: str, max_depth: int = 3):
     """
     Finds files of a specific type buried within a directory structure up to a specified depth.
 

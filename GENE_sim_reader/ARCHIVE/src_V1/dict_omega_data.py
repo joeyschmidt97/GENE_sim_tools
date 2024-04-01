@@ -1,7 +1,7 @@
-import os
-import numpy as np
+#!/usr/bin/env python3
 
-from GENE_sim_tools.GENE_sim_reader.src.utils.file_functions import file_checks, FileError, switch_suffix_file
+import os
+from GENE_sim_tools.GENE_sim_reader.ARCHIVE.src.utils.file_functions import file_checks, FileError, switch_suffix_file
 
 
 #------------------------------------------------------------------------------------------------
@@ -26,11 +26,10 @@ def omega_filepath_to_dict(omega_filepath:str, debug:bool = False):
 def create_omega_dict(omega_filepath:str):
     check_empty = (os.stat(omega_filepath).st_size == 0)
 
-    omega_dict = {}
-
     if check_empty:
-        return {'gamma': np.nan, 'omega': np.nan}
-
+        return {}
+    else:
+        omega_dict = {'filepath': omega_filepath}
 
     if not check_empty:
         # Read in the omega file
