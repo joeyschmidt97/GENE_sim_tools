@@ -8,7 +8,7 @@ from GENE_sim_tools.GENE_sim_reader.src.filetype_key_lists import field_key_list
 
 
 
-def field_filepath_to_dict(field_filepath:str, time_criteria='all', field_quantities='all'):
+def field_filepath_to_dict(field_filepath:str, time_criteria='last', field_quantities='all'):
     """
     Converts a 'field' file at a given filepath to a field dictionary.
     Returns the field dictionary.
@@ -17,14 +17,15 @@ def field_filepath_to_dict(field_filepath:str, time_criteria='all', field_quanti
     try:
         file_checks(field_filepath, filetype='field')
         field_dict = create_field_dict(field_filepath, time_criteria, field_quantities)
+        flattened_field_dict = {key: value[0] for key, value in field_dict.items()}
 
-        return field_dict
+        return flattened_field_dict
     except FileError as e:
         print(e)
 
 
 
-def create_field_dict(field_filepath:str, time_criteria='all', field_quantities='all'):
+def create_field_dict(field_filepath:str, time_criteria='last', field_quantities='all'):
     """
     Reads field data from a binary file and returns a dictionary containing relevant information.
 
@@ -52,6 +53,9 @@ def create_field_dict(field_filepath:str, time_criteria='all', field_quantities=
     
     if time_criteria=='all':
         time_criteria = {'bounds': [float('-inf'), float('inf')], 'logic_op_list': ['>', '<']}
+    elif time_criteria=='last':
+        time_criteria = {'bounds': 'last', 'logic_op_list': ['>', '<']}
+
 
 
     # Extracting parameters from the corresponding parameters file
@@ -125,6 +129,7 @@ def create_field_dict(field_filepath:str, time_criteria='all', field_quantities=
 
         # cycle through time values
         for time_index in time_index_list:
+
             # cycle through field names from named_field_col above
             for field_name in field_names:
                 ind = field_column_keys.index(field_name) # get index of field name (phi -> 0, apar -> 1, bpar -> 2)
@@ -135,13 +140,77 @@ def create_field_dict(field_filepath:str, time_criteria='all', field_quantities=
                 file.seek(offset)
 
                 data_array = np.fromfile(file, count=nx * ny * nz, dtype=complex_dtype).reshape(nz, ny, nx)
+                flat_data_array, zgrid = data_array_flattened(data_array, nz, nx)
 
                 # Appending field data into field dict
-                field_dict.setdefault(field_name, []).append(data_array)
+                field_dict.setdefault(field_name, []).append(flat_data_array)
+                field_dict.setdefault('zgrid', []).append(zgrid)
 
-    field_dict['filepath'] = field_filepath
-    field_dict['key_list'] = field_key_list
+    # field_dict['filepath'] = field_filepath
+    # field_dict['key_list'] = field_key_list
     return field_dict
+
+
+
+
+
+
+
+def data_array_flattened(data_array, nz, nx):
+
+    dz = float(2.0)/float(nz)
+    ntot = nz*nx
+    zgrid = np.arange(ntot)/float(ntot-1)*(2*nx-dz)-nx
+
+
+    flattened_array = np.zeros(nz*nx,dtype='complex128')
+    half_nx_int = int(nx/2)
+
+    for i in range(half_nx_int):
+
+        lower_end = (i+half_nx_int)*nz
+        upper_end = (i+half_nx_int+1)*nz
+        
+        flattened_array[lower_end:upper_end] = data_array[:,0,i]
+
+        lower_end_neg = (half_nx_int-i-1)*nz
+        upper_end_neg = (half_nx_int-i)*nz
+
+        flattened_array[lower_end_neg:upper_end_neg] = data_array[:,0,-1-i]
+
+    # half_nz_int = int(nz/2)
+    # rescaled_flattened_array = flattened_array/data_array[half_nz_int,0,0]
+
+    return flattened_array, zgrid
+
+
+
+
+
+
+# def rescale_array(original_array, sim_df):
+
+#     array_rescaled = np.zeros(len(original_array),dtype='complex128')
+    
+#     nx = sim_df['nx0'][0]
+#     half_nx_int = int(nx/2)
+#     nz = sim_df['nz0'][0]
+
+#     phase_fac = -np.e**(-2.0*np.pi*(0.0+1.0J)*sim_df['n0_global'][0]*sim_df['q0'][0])
+
+#     for i in range(half_nx_int):
+
+#         lower_end = (i+half_nx_int)*nz
+#         upper_end = (i+half_nx_int+1)*nz
+
+#         array_rescaled[lower_end:upper_end] = original_array[lower_end:upper_end]*phase_fac**i
+
+#         lower_end_neg = (half_nx_int-i-1)*nz
+#         upper_end_neg = (half_nx_int-i)*nz
+
+#         array_rescaled[lower_end_neg:upper_end_neg] = original_array[lower_end_neg:upper_end_neg]*phase_fac**(-(i+1))
+    
+#     return array_rescaled
 
 
 

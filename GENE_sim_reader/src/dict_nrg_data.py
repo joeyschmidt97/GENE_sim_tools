@@ -3,7 +3,7 @@
 import os
 import numpy as np
 from GENE_sim_tools.GENE_sim_reader.src.utils.file_functions import file_checks, FileError, switch_suffix_file, string_to_list
-from GENE_sim_tools.GENE_sim_reader.src.criteria_code.criteria_checker import criteria_checker
+# from GENE_sim_tools.GENE_sim_reader.src.criteria_code.criteria_checker import criteria_checker
 from GENE_sim_tools.GENE_sim_reader.src.filetype_key_lists import nrg_column_keys, nrg_key_list
 
 from GENE_sim_tools.GENE_sim_reader.src.dict_parameters_data import create_species_tuple
@@ -13,7 +13,7 @@ from GENE_sim_tools.GENE_sim_reader.src.dict_parameters_data import create_speci
 # BASE FUNCTION TO CONVERT nrg TO DICT-----------------------------------------------------------
 #------------------------------------------------------------------------------------------------
 
-def nrg_filepath_to_dict(nrg_filepath:str, time_criteria='all', nrg_spec='all', nrg_quantities='all'):
+def nrg_filepath_to_dict(nrg_filepath:str, time_criteria='last', nrg_spec='all', nrg_quantities='all'):
     try:
         file_checks(nrg_filepath, filetype='nrg')
         nrg_dict = create_nrg_dict(nrg_filepath, time_criteria, nrg_spec, nrg_quantities)
@@ -25,12 +25,14 @@ def nrg_filepath_to_dict(nrg_filepath:str, time_criteria='all', nrg_spec='all', 
 
 
 
-def create_nrg_dict(nrg_filepath:str, time_criteria='all', nrg_spec='all', nrg_quantities='all'):
+def create_nrg_dict(nrg_filepath:str, time_criteria='last', nrg_spec='all', nrg_quantities='all'):
     # Initializing the nrg dictionary with default values
     nrg_dict = {}
 
     if time_criteria=='all':
         time_criteria = {'bounds': [float('-inf'), float('inf')], 'logic_op_list': ['>', '<']}
+    elif time_criteria=='last':
+        time_criteria = {'bounds': 'last', 'logic_op_list': ['>', '<']}
 
     # Extracting parameters from the corresponding parameters file
     parameter_filepath = switch_suffix_file(nrg_filepath, 'parameters')
@@ -66,12 +68,14 @@ def create_nrg_dict(nrg_filepath:str, time_criteria='all', nrg_spec='all', nrg_q
                     nrg_dict = nrg_final_checks(nrg_dict, nrg_filepath, nrg_key_list)
                     return nrg_dict
                 
-                elif criteria_checker(time, time_criteria):
-                    nrg_dict.setdefault('time', []).append(time)
-                    nrg_dict = extract_nrg_data(nrg_dict, data, ind, nrg_spec_ind, nrg_quant_ind, time_criteria['bounds'])
+                # elif criteria_checker(time, time_criteria):
+                #     nrg_dict.setdefault('time', []).append(time)
+                #     nrg_dict = extract_nrg_data(nrg_dict, data, ind, nrg_spec_ind, nrg_quant_ind, time_criteria['bounds'])
 
     nrg_dict = nrg_final_checks(nrg_dict, nrg_filepath, nrg_key_list)
     return nrg_dict                
+
+
 
 
 
@@ -88,8 +92,8 @@ def nrg_final_checks(nrg_dict:dict, nrg_filepath:str, nrg_key_list:list):
                 except:
                     pass
 
-        nrg_dict['filepath'] = nrg_filepath
-        nrg_dict['key_list'] = nrg_key_list
+        # nrg_dict['filepath'] = nrg_filepath
+        # nrg_dict['key_list'] = nrg_key_list
 
         return nrg_dict
 
