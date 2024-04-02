@@ -134,14 +134,55 @@ def create_field_dict(field_filepath:str, time_criteria='all', field_quantities=
 
                 file.seek(offset)
 
-                data_array = np.fromfile(file, count=nx * ny * nz, dtype=complex_dtype).reshape(nz, ny, nx)
+                try:
+                    data_array = np.fromfile(file, count=nx * ny * nz, dtype=complex_dtype).reshape(nz, ny, nx)
+                    flat_data_array, zgrid = data_array_flattened(data_array, nz, nx)
+                except:
+                    print(field_name, field_filepath)
+                    return {}
 
                 # Appending field data into field dict
-                field_dict.setdefault(field_name, []).append(data_array)
+                field_dict.setdefault(field_name, []).append(flat_data_array)
+                field_dict.setdefault('zgrid', []).append(zgrid)
+
+                
 
     field_dict['filepath'] = field_filepath
     field_dict['key_list'] = field_key_list
     return field_dict
+
+
+
+
+
+
+
+def data_array_flattened(data_array, nz, nx):
+
+    dz = float(2.0)/float(nz)
+    ntot = nz*nx
+    zgrid = np.arange(ntot)/float(ntot-1)*(2*nx-dz)-nx
+
+
+    flattened_array = np.zeros(nz*nx,dtype='complex128')
+    half_nx_int = int(nx/2)
+
+    for i in range(half_nx_int):
+
+        lower_end = (i+half_nx_int)*nz
+        upper_end = (i+half_nx_int+1)*nz
+        
+        flattened_array[lower_end:upper_end] = data_array[:,0,i]
+
+        lower_end_neg = (half_nx_int-i-1)*nz
+        upper_end_neg = (half_nx_int-i)*nz
+
+        flattened_array[lower_end_neg:upper_end_neg] = data_array[:,0,-1-i]
+
+    # half_nz_int = int(nz/2)
+    # rescaled_flattened_array = flattened_array/data_array[half_nz_int,0,0]
+
+    return flattened_array, zgrid
 
 
 
