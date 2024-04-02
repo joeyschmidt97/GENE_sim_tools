@@ -3,8 +3,8 @@ import numpy as np
 from os.path import getsize
 
 from GENE_sim_tools.GENE_sim_reader.src.utils.file_functions import switch_suffix_file, file_checks, FileError, rescale_list
-from GENE_sim_tools.GENE_sim_reader.src.dict_parameters_data import parameters_filepath_to_dict
-from GENE_sim_tools.GENE_sim_reader.src.filetype_key_lists import field_key_list, field_column_keys
+from GENE_sim_tools.GENE_sim_reader.src.GENE_data_extraction.dict_parameters_data import parameters_filepath_to_dict
+from GENE_sim_tools.GENE_sim_reader.src.GENE_data_extraction.filetype_key_lists import field_key_list, field_column_keys
 
 
 

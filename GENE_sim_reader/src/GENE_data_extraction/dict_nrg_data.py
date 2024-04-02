@@ -4,9 +4,9 @@ import os
 import numpy as np
 from GENE_sim_tools.GENE_sim_reader.src.utils.file_functions import file_checks, FileError, switch_suffix_file, string_to_list
 # from GENE_sim_tools.GENE_sim_reader.src.criteria_code.criteria_checker import criteria_checker
-from GENE_sim_tools.GENE_sim_reader.src.filetype_key_lists import nrg_column_keys, nrg_key_list
+from GENE_sim_tools.GENE_sim_reader.src.GENE_data_extraction.filetype_key_lists import nrg_column_keys, nrg_key_list
 
-from GENE_sim_tools.GENE_sim_reader.src.dict_parameters_data import create_species_tuple
+from GENE_sim_tools.GENE_sim_reader.src.GENE_data_extraction.dict_parameters_data import create_species_tuple
 
 
 #------------------------------------------------------------------------------------------------
@@ -86,9 +86,14 @@ def nrg_final_checks(nrg_dict:dict, nrg_filepath:str, nrg_key_list:list):
     else:
 
         for key in nrg_dict.keys():
-            if isinstance(nrg_dict[key], list) and key not in ['key_list', 'filepath']:
+            if (isinstance(nrg_dict[key], list)) and (key not in ['key_list', 'filepath']):
+            
                 try:
-                    nrg_dict[key] = np.array(nrg_dict[key])
+                    # If the length of the quantities is greater than 1 convert ot an array if not just extract the single value
+                    if len(nrg_dict[key]) > 1:
+                        nrg_dict[key] = np.array(nrg_dict[key])
+                    else:
+                        nrg_dict[key] = nrg_dict[key][0]
                 except:
                     pass
 
