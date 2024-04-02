@@ -1,7 +1,7 @@
 import xarray as xr
 import pandas as pd
 import math
-import numpy as np
+
 
 from GENE_sim_tools.GENE_sim_reader.src.utils.file_functions import string_to_list, switch_suffix_file
 from GENE_sim_tools.GENE_sim_reader.src.utils.find_buried_filetypes import find_buried_filetypes
