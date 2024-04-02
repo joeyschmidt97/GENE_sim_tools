@@ -63,13 +63,6 @@ def filepath_to_sim_xarray(input_filepath:str):
 
 
 
-
-
-
-
-
-
-
 def rename_num_quantity_to_spec_name(input_dict:dict, spec_tuple):
 
     # Generate a new list with updated keys
