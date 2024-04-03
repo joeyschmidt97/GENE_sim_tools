@@ -9,7 +9,14 @@ from GENE_sim_tools.GENE_sim_reader.src.utils.find_buried_filetypes import find_
 from GENE_sim_tools.GENE_sim_reader.src.GENE_data_extraction.dict_parameters_data import parameters_filepath_to_dict, create_species_tuple
 from GENE_sim_tools.GENE_sim_reader.src.GENE_data_extraction.dict_omega_data import omega_filepath_to_dict
 from GENE_sim_tools.GENE_sim_reader.src.GENE_data_extraction.dict_nrg_data import nrg_filepath_to_dict
-from GENE_sim_tools.GENE_sim_reader.src.GENE_data_extraction.dict_field_data import field_filepath_to_dict
+
+
+
+
+
+from GENE_sim_tools.GENE_sim_reader.src.GENE_data_extraction.field_data.dict_field_data import return_field_dict
+from GENE_sim_tools.GENE_sim_reader.src.GENE_data_extraction.field_data.get_field_data import get_delta_angle_counts, get_fft_mag_counts
+
 
 
 
@@ -31,7 +38,6 @@ def filepath_to_sim_xarray(input_filepath:str):
         parameters_data.append(parameters_dict)
 
         sim_output_dict = {}
-
         omega_path = switch_suffix_file(parameters_path, 'omega')
         omega_dict = omega_filepath_to_dict(omega_path)
 
@@ -43,7 +49,26 @@ def filepath_to_sim_xarray(input_filepath:str):
             sim_output_dict.update(nrg_dict)
 
 
+
+            field_path = switch_suffix_file(parameters_path, 'field')
+            field_name = 'phi'
+            field_dict = return_field_dict(field_path, [field_name])
+            complex_array = field_dict[field_name]
+
+            # Compute FFT and angle difference data
+            freq_bins, relative_mag_counts = get_fft_mag_counts(complex_num_array=complex_array)
+            angle_bins, relative_frequency = get_delta_angle_counts(complex_array)
+
+
+            # Update the simulation output dictionary with FFT and angle difference data
+            sim_output_dict['fft_freq_bins'] = freq_bins
+            sim_output_dict['fft_relative_mag_counts'] = relative_mag_counts
+            sim_output_dict['angle_diff_bins'] = angle_bins
+            sim_output_dict['angle_diff_relative_frequency'] = relative_frequency
+
+
             sim_output_dict = rename_num_quantity_to_spec_name(sim_output_dict, spec_tuple)
+
     
         simulation_output_data.append(sim_output_dict)
 
@@ -51,12 +76,20 @@ def filepath_to_sim_xarray(input_filepath:str):
     parameters_df = pd.DataFrame(parameters_data)
     simulations_df = pd.DataFrame(simulation_output_data)
 
-    # Convert to xarray Dataset
-    xr_ds = xr.Dataset.from_dataframe(simulations_df)
-    for column in parameters_df.columns:
-        xr_ds = xr_ds.assign_coords({column: ('index', parameters_df[column].values)})
+    merged_df = pd.concat([parameters_df, simulations_df], axis=1)
 
-    return xr_ds
+    return merged_df
+
+
+    
+    # # Convert to xarray Dataset
+    # xr_ds = xr.Dataset.from_dataframe(simulations_df)
+    # for column in parameters_df.columns:
+    #     xr_ds = xr_ds.assign_coords({column: ('index', parameters_df[column].values)})
+
+    # return xr_ds
+
+
 
 
 
@@ -77,3 +110,9 @@ def rename_num_quantity_to_spec_name(input_dict:dict, spec_tuple):
             renamed_dict[key] = value
 
     return renamed_dict
+
+
+
+
+
+
