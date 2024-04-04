@@ -7,15 +7,12 @@ from GENE_sim_tools.GENE_sim_reader.src.GENE_data_extraction.dict_parameters_dat
 
 
 
-def return_field_dict(field_filepath:str, field_quantities:list, time_criteria='last'):
+def field_filepath_to_dict(field_filepath:str, field_quantities:list=None, time_criteria='last'):
 
     try:
         file_checks(field_filepath, filetype='field')
 
-        parameter_filepath = switch_suffix_file(field_filepath, 'parameters')
-        param_dict = parameters_filepath_to_dict(parameter_filepath)
-
-        field_dict = create_field_dict(field_filepath, param_dict, field_quantities, time_criteria)
+        field_dict = create_field_dict(field_filepath, field_quantities, time_criteria)
         flattened_field_dict = {key: value[0] for key, value in field_dict.items()}
 
         return flattened_field_dict
@@ -33,7 +30,7 @@ def return_field_dict(field_filepath:str, field_quantities:list, time_criteria='
 
 
 
-def create_field_dict(field_filepath:str, param_dict:dict, field_quantities:list, time_criteria='last'):
+def create_field_dict(field_filepath:str, field_quantities:list=None, time_criteria='last'):
     """
     Reads field data from a binary file and returns a dictionary containing relevant information.
 
@@ -64,6 +61,17 @@ def create_field_dict(field_filepath:str, param_dict:dict, field_quantities:list
         time_criteria = {'bounds': 'last', 'logic_op_list': ['>', '<']}
 
 
+    parameter_filepath = switch_suffix_file(field_filepath, 'parameters')
+    param_dict = parameters_filepath_to_dict(parameter_filepath)
+    if field_quantities is None:
+        beta = param_dict['beta']
+        bpar = param_dict.get('bpar', False)
+
+        field_quantities = ['phi']
+        if beta > 0:
+            field_quantities.append('apar')
+            if bpar:
+                field_quantities.append('bpar')
 
     # Reading binary field data
     with open(field_filepath, 'rb') as file:
