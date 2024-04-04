@@ -3,7 +3,7 @@ import numpy as np
 from os.path import getsize
 
 from GENE_sim_tools.sims_to_df.src.utils.file_functions import switch_suffix_file, file_checks, FileError
-from GENE_sim_tools.sims_to_df.src.GENE_data_extraction.dict_parameters_data import parameters_filepath_to_dict
+from GENE_sim_tools.sims_to_df.src.dict_parameters_data import parameters_filepath_to_dict
 
 
 
@@ -67,11 +67,11 @@ def create_field_dict(field_filepath:str, field_quantities:list=None, time_crite
         beta = param_dict['beta']
         bpar = param_dict.get('bpar', False)
 
-        field_quantities = ['phi']
+        field_quantities = ['field_phi']
         if beta > 0:
-            field_quantities.append('apar')
+            field_quantities.append('field_apar')
             if bpar:
-                field_quantities.append('bpar')
+                field_quantities.append('field_bpar')
 
     # Reading binary field data
     with open(field_filepath, 'rb') as file:

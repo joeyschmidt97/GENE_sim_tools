@@ -3,7 +3,10 @@ from scipy.interpolate import interp1d
 
 
 
-def complex_array_data_analysis(input_sim_df, field_name='phi'):
+
+
+
+def complex_array_resolution_analysis(input_sim_df, field_name='field_phi'):
     # Copy the DataFrame to avoid modifying the original data
     sim_df = input_sim_df.copy()
 

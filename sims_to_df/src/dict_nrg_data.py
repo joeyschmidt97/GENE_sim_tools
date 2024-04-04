@@ -4,9 +4,9 @@ import os
 import numpy as np
 from GENE_sim_tools.GENE_sim_reader.src.utils.file_functions import file_checks, FileError, switch_suffix_file, string_to_list
 # from GENE_sim_tools.GENE_sim_reader.src.criteria_code.criteria_checker import criteria_checker
-from GENE_sim_tools.sims_to_df.src.GENE_data_extraction.filetype_key_lists import nrg_column_keys, nrg_key_list
+from GENE_sim_tools.sims_to_df.src.filetype_key_lists import nrg_column_keys, nrg_key_list
 
-from GENE_sim_tools.sims_to_df.src.GENE_data_extraction.dict_parameters_data import create_species_tuple
+from GENE_sim_tools.sims_to_df.src.dict_parameters_data import create_species_tuple
 
 
 #------------------------------------------------------------------------------------------------
