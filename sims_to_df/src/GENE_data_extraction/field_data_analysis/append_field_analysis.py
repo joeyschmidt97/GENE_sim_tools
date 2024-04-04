@@ -1,89 +1,45 @@
 import numpy as np
 from scipy.interpolate import interp1d
 
-import pandas as pd
-import numpy as np
-
-
-
-
-
 
 
 def complex_array_data_analysis(input_sim_df, field_name='phi'):
+    # Copy the DataFrame to avoid modifying the original data
     sim_df = input_sim_df.copy()
 
-    # Define a function to compute FFT and angle information
-    def compute_fft_and_stats(complex_array):
+    # Initialize columns for FFT and angle info
+    sim_df[f'{field_name}_fft_info'] = None
+    sim_df[f'{field_name}_angle_info'] = None
+
+    # Iterate over rows using iterrows()
+    for index, row in sim_df.iterrows():
+        # Get the complex array data
+        complex_array = row[field_name]
+
         if isinstance(complex_array, (list, np.ndarray)):
+            # Calculate FFT and angle information
             freq_bins, relative_mag_counts = get_fft_mag_counts(complex_array)
             mean_freq, freq_lower_95, freq_upper_95 = histogram_stats(freq_bins, relative_mag_counts)
-            return pd.Series([freq_bins, relative_mag_counts, mean_freq, freq_lower_95, freq_upper_95])
-        else:
-            return pd.Series([np.nan] * 5)  # Return NaNs if the input is not list or ndarray
 
-    # Apply the function and assign the results to new columns
-    sim_df[['fft_freq', 'fft_rel_mag', 'fft_ave_freq', 'fft_lower_95_freq', 'fft_upper_95_freq']] = sim_df[field_name].apply(compute_fft_and_stats, result_type='expand')
-
-    return sim_df
+            angle_bins, relative_frequency = get_delta_angle_counts(complex_array)
+            mean_angle, angle_lower_95, angle_upper_95 = histogram_stats(angle_bins, relative_frequency)
 
 
 
-# def complex_array_data_analysis(input_sim_df, field_name='phi'):
-#     sim_df = input_sim_df.copy()
-
-#     # Define a function to compute FFT and angle information
-#     def compute_fft_and_stats(complex_array):
-#         if isinstance(complex_array, (list, np.ndarray)):
-#             freq_bins, relative_mag_counts = get_fft_mag_counts(complex_array)
-#             mean_freq, freq_lower_95, freq_upper_95 = histogram_stats(freq_bins, relative_mag_counts)
-#             return pd.Series([freq_bins, relative_mag_counts, mean_freq, freq_lower_95, freq_upper_95])
-
-#     # Apply the function and assign the results to new columns
-#     sim_df[['fft_freq', 'fft_rel_mag', 'fft_ave_freq', 'fft_lower_95_freq', 'fft_upper_95_freq']] = sim_df[field_name].apply(compute_fft_and_stats)
-
-
-    # # Initialize columns for FFT and angle info
-    # sim_df[f'{field_name}_fft_info'] = None
-    # sim_df[f'{field_name}_angle_info'] = None
-
-    # for index, row in sim_df.iterrows():
-    #     complex_array = row[field_name]
-
-    #     if isinstance(complex_array, (list, np.ndarray)):
-    #         # Calculate FFT and angle information
-    #         freq_bins, relative_mag_counts = get_fft_mag_counts(complex_array)
-    #         mean_freq, freq_lower_95, freq_upper_95 = histogram_stats(freq_bins, relative_mag_counts)
-
-    #         column_names = ['fft_freq', 'fft_rel_mag', 'fft_ave_freq', 'fft_lower_95_freq', 'fft_upper_95_freq']
-
-
-            # # Assign the calculated data to the DataFrame
-            # sim_df.loc[index, f'{field_name}_fft_info'] = {
-            #     'fft_freq': np.array(freq_bins), 
-            #     'rel_mag': np.array(relative_mag_counts),
-            #     'ave_freq': mean_freq,
-            #     'lower_95_freq': freq_lower_95,
-            #     'upper_95_freq': freq_upper_95
-            # }
-
-            # angle_bins, relative_frequency = get_delta_angle_counts(complex_array)
-            # mean_angle, angle_lower_95, angle_upper_95 = histogram_stats(angle_bins, relative_frequency)
+            # Assign the calculated data to the DataFrame
+            sim_df.at[index, f'{field_name}_fft_info'] = {'fft_freq': freq_bins, 
+                                                          'rel_mag': relative_mag_counts,
+                                                          'ave_freq': mean_freq,
+                                                          'lower_95_freq': freq_lower_95,
+                                                          'upper_95_freq': freq_upper_95}
             
-            # sim_df.loc[index, f'{field_name}_angle_info'] = {
-            #     'angles': angle_bins, 
-            #     'rel_freq': relative_frequency,
-            #     'ave_angle': mean_angle,
-            #     'lower_95_angle': angle_lower_95,
-            #     'upper_95_angle': angle_upper_95
-            # }
+            sim_df.at[index, f'{field_name}_angle_info'] = {'angles': angle_bins, 
+                                                            'rel_freq': relative_frequency,
+                                                            'ave_angle': mean_angle,
+                                                            'lower_95_angle': angle_lower_95,
+                                                            'upper_95_angle': angle_upper_95}
 
     return sim_df
-
-
-
-
-
 
 
 
@@ -169,5 +125,5 @@ def get_fft_mag_counts(complex_num_array: np.ndarray, output_length: int = 100):
     else:
         relative_mag_counts = np.zeros_like(interpolated_magnitudes)
 
-    return np.array(freq_bins), np.array(relative_mag_counts)
+    return freq_bins, relative_mag_counts
 

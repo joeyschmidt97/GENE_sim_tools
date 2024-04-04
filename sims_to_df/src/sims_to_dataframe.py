@@ -3,10 +3,10 @@ import pandas as pd
 import math
 
 
-from GENE_sim_tools.GENE_sim_reader.src.utils.file_functions import string_to_list, switch_suffix_file
-from GENE_sim_tools.GENE_sim_reader.src.utils.find_buried_filetypes import find_buried_filetypes
+from GENE_sim_tools.sims_to_df.src.utils.file_functions import string_to_list, switch_suffix_file
+from GENE_sim_tools.sims_to_df.src.utils.find_buried_filetypes import find_buried_filetypes
 
-from GENE_sim_tools.sims_to_df.src.GENE_data_extraction.dict_parameters_data import parameters_filepath_to_dict, create_species_tuple
+from GENE_sim_tools.sims_to_df.src.GENE_data_extraction.dict_parameters_data import parameters_filepath_to_dict
 from GENE_sim_tools.sims_to_df.src.GENE_data_extraction.dict_omega_data import omega_filepath_to_dict
 from GENE_sim_tools.sims_to_df.src.GENE_data_extraction.dict_nrg_data import nrg_filepath_to_dict
 from GENE_sim_tools.sims_to_df.src.GENE_data_extraction.dict_field_data import field_filepath_to_dict
