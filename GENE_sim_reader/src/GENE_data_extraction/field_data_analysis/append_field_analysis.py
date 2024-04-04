@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 from scipy.interpolate import interp1d
 
 
@@ -33,7 +32,8 @@ def complex_array_data_analysis(input_sim_df, field_name='phi'):
                                                           'ave_freq': mean_freq,
                                                           'lower_95_freq': freq_lower_95,
                                                           'upper_95_freq': freq_upper_95}
-            sim_df.at[index, f'{field_name}_angle_info'] = {'angle': angle_bins, 
+            
+            sim_df.at[index, f'{field_name}_angle_info'] = {'angles': angle_bins, 
                                                             'rel_freq': relative_frequency,
                                                             'ave_angle': mean_angle,
                                                             'lower_95_angle': angle_lower_95,
