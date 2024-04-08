@@ -59,6 +59,31 @@ def filepath_to_sim_df(input_filepath:str):
 
 
 
+# def save_df_to_parquet(input_sim_df: pd.DataFrame, save_directory: str, filename: str = 'sim_df.parquet'):
+#     # Identify and drop columns that contain arrays or lists
+#     columns_to_drop = [col for col in input_sim_df.columns if any(isinstance(x, (list, np.ndarray)) for x in input_sim_df[col])]
+#     columns_to_drop.append('time')
+#     columns_to_drop.sort()
+
+#     # Print the columns that will be dropped
+#     print("Dropping columns containing arrays or lists:", columns_to_drop)
+
+#     # Drop the identified columns
+#     input_sim_df = input_sim_df.drop(columns=columns_to_drop)
+
+#     # Ensure the filename ends with .parquet
+#     if not filename.endswith('.parquet'):
+#         filename += '.parquet'
+    
+#     save_filepath = os.path.join(save_directory, filename)
+#     input_sim_df.to_parquet(save_filepath)
+
+#     print(f"DataFrame saved to {save_filepath}")
+
+import os
+import pandas as pd
+import numpy as np
+
 def save_df_to_parquet(input_sim_df: pd.DataFrame, save_directory: str, filename: str = 'sim_df.parquet'):
     # Identify and drop columns that contain arrays or lists
     columns_to_drop = [col for col in input_sim_df.columns if any(isinstance(x, (list, np.ndarray)) for x in input_sim_df[col])]
@@ -70,6 +95,11 @@ def save_df_to_parquet(input_sim_df: pd.DataFrame, save_directory: str, filename
 
     # Drop the identified columns
     input_sim_df = input_sim_df.drop(columns=columns_to_drop)
+
+    # Convert columns with mixed types to float and handle None values
+    for col in input_sim_df.columns:
+        if input_sim_df[col].dtype == object:
+            input_sim_df[col] = pd.to_numeric(input_sim_df[col], errors='coerce')
 
     # Ensure the filename ends with .parquet
     if not filename.endswith('.parquet'):
@@ -86,33 +116,45 @@ def save_df_to_parquet(input_sim_df: pd.DataFrame, save_directory: str, filename
 
 
 
+def load_parquet_to_df(directory: str, input_filename:str=None, reload_field_data:bool=False) -> pd.DataFrame:
+    
+        
+    
+        
 
-def load_parquet_to_df(directory: str) -> pd.DataFrame:
-    # Get all parquet files in the directory
-    files = [f for f in os.listdir(directory) if f.endswith('.parquet')]
-    
-    if len(files) == 0:
-        raise FileNotFoundError("No Parquet files found in the specified directory.")
-    elif len(files) == 1:
-        filepath = os.path.join(directory, files[0])
+    if input_filename is None:
+        # Get all parquet files in the directory
+        files = [f for f in os.listdir(directory) if f.endswith('.parquet')]
+        
+        if len(files) == 0:
+            raise FileNotFoundError("No Parquet files found in the specified directory.")
+        elif len(files) == 1:
+            filepath = os.path.join(directory, files[0])
+        else:
+            print("Multiple Parquet files found:")
+            for i, file in enumerate(files, start=1):
+                print(f"{i}: {file}")
+            
+            file_index = int(input("Enter the number of the file you want to load: ")) - 1
+            if file_index < 0 or file_index >= len(files):
+                raise ValueError("Invalid file number selected.")
+            
+            filepath = os.path.join(directory, files[file_index])
+
     else:
-        print("Multiple Parquet files found:")
-        for i, file in enumerate(files, start=1):
-            print(f"{i}: {file}")
+        filepath = os.path.join(directory, input_filename) 
         
-        file_index = int(input("Enter the number of the file you want to load: ")) - 1
-        if file_index < 0 or file_index >= len(files):
-            raise ValueError("Invalid file number selected.")
-        
-        filepath = os.path.join(directory, files[file_index])
-    
+
 
     print(f"Loading {filepath}")
 
     # Load the DataFrame from the chosen Parquet file
     loaded_df = pd.read_parquet(filepath)
 
-    sim_df = reload_field_data_to_df(loaded_df)
+    if reload_field_data:
+        sim_df = reload_field_data_to_df(loaded_df)
+    else:
+        sim_df = loaded_df
 
     return sim_df
 

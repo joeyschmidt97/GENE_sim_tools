@@ -1,25 +1,51 @@
 import numpy as np
+import pandas as pd
 from scipy.interpolate import interp1d
-
-
-
+from GENE_sim_tools.sims_to_df.src.dict_field_data import field_filepath_to_dict
+from GENE_sim_tools.sims_to_df.src.utils.file_functions import switch_suffix_file
 
 
 
 def complex_array_resolution_analysis(input_sim_df, field_name='field_phi'):
-    # Copy the DataFrame to avoid modifying the original data
     sim_df = input_sim_df.copy()
 
-    # Initialize columns for FFT and angle info
-    sim_df[f'{field_name}_fft_info'] = None
-    sim_df[f'{field_name}_angle_info'] = None
 
-    # Iterate over rows using iterrows()
-    for index, row in sim_df.iterrows():
-        # Get the complex array data
-        complex_array = row[field_name]
+    sim_df['diff_abs'] = None
+    sim_df['corr_len'] = None
 
-        if isinstance(complex_array, (list, np.ndarray)):
+    # Prepare columns for storing FFT and angle info
+    sim_df[f'{field_name}_fft_freq'] = None
+    sim_df[f'{field_name}_rel_mag'] = None
+    sim_df[f'{field_name}_ave_freq'] = None
+    sim_df[f'{field_name}_lower_95_freq'] = None
+    sim_df[f'{field_name}_upper_95_freq'] = None
+
+    sim_df[f'{field_name}_angles'] = None
+    sim_df[f'{field_name}_rel_freq'] = None
+    sim_df[f'{field_name}_ave_angle'] = None
+    sim_df[f'{field_name}_lower_95_angle'] = None
+    sim_df[f'{field_name}_upper_95_angle'] = None
+
+
+
+    for index, row in sim_df.iterrows():  
+
+        gamma = row['gamma']
+        if pd.notna(gamma): 
+        
+            if (gamma > 0):
+                diff_abs_value, corr_len_value =  get_row_field_quantities(row)
+                sim_df.at[index, 'diff_abs'] = diff_abs_value
+                sim_df.at[index, 'corr_len'] = corr_len_value
+
+            
+            if field_name not in sim_df.columns:
+                field_path = switch_suffix_file(row['filepath'], 'field')
+                field_dict = field_filepath_to_dict(field_path)
+                complex_array = field_dict[field_name]
+            else:
+                complex_array = row[field_name]        
+            
             # Calculate FFT and angle information
             freq_bins, relative_mag_counts = get_fft_mag_counts(complex_array)
             mean_freq, freq_lower_95, freq_upper_95 = histogram_stats(freq_bins, relative_mag_counts)
@@ -27,23 +53,20 @@ def complex_array_resolution_analysis(input_sim_df, field_name='field_phi'):
             angle_bins, relative_frequency = get_delta_angle_counts(complex_array)
             mean_angle, angle_lower_95, angle_upper_95 = histogram_stats(angle_bins, relative_frequency)
 
+            # Assign the calculated data to individual columns in the DataFrame
+            sim_df.at[index, f'{field_name}_fft_freq'] = freq_bins
+            sim_df.at[index, f'{field_name}_rel_mag'] = relative_mag_counts
+            sim_df.at[index, f'{field_name}_ave_freq'] = mean_freq
+            sim_df.at[index, f'{field_name}_lower_95_freq'] = freq_lower_95
+            sim_df.at[index, f'{field_name}_upper_95_freq'] = freq_upper_95
 
-
-            # Assign the calculated data to the DataFrame
-            sim_df.at[index, f'{field_name}_fft_info'] = {'fft_freq': freq_bins, 
-                                                          'rel_mag': relative_mag_counts,
-                                                          'ave_freq': mean_freq,
-                                                          'lower_95_freq': freq_lower_95,
-                                                          'upper_95_freq': freq_upper_95}
-            
-            sim_df.at[index, f'{field_name}_angle_info'] = {'angles': angle_bins, 
-                                                            'rel_freq': relative_frequency,
-                                                            'ave_angle': mean_angle,
-                                                            'lower_95_angle': angle_lower_95,
-                                                            'upper_95_angle': angle_upper_95}
+            sim_df.at[index, f'{field_name}_angles'] = angle_bins
+            sim_df.at[index, f'{field_name}_rel_freq'] = relative_frequency
+            sim_df.at[index, f'{field_name}_ave_angle'] = mean_angle
+            sim_df.at[index, f'{field_name}_lower_95_angle'] = angle_lower_95
+            sim_df.at[index, f'{field_name}_upper_95_angle'] = angle_upper_95
 
     return sim_df
-
 
 
 
@@ -130,3 +153,34 @@ def get_fft_mag_counts(complex_num_array: np.ndarray, output_length: int = 100):
 
     return freq_bins, relative_mag_counts
 
+
+
+
+
+import os
+import subprocess
+
+def get_row_field_quantities(sim_df_row):
+
+    param_filepath = sim_df_row['filepath']
+    dir_filepath = os.path.dirname(param_filepath)
+    suffix = sim_df_row['suffix']
+
+    os.chdir(dir_filepath)
+
+    # Get the full path to the script
+    script_path = os.path.abspath('/global/homes/j/joeschm/tools/IFS_scripts/plot_mode_structures.py')
+    result = subprocess.run(['python3', script_path, suffix, '-e', '-b'], stdout=subprocess.PIPE)  # Run the script with the specified arguments
+
+    # Get the stdout as a string
+    output = result.stdout.decode('utf-8')
+
+    # Find the line that contains the "diff/abs" value
+    diff_abs_line = [line for line in output.split('\n') if 'diff/abs' in line][0]
+    diff_abs_value = float(diff_abs_line.split()[-1])   # Extract the numerical value from the line
+    
+    # Find the line that contains the "corr_len" value
+    corr_len_line = [line for line in output.split('\n') if 'correlation length (for phi):' in line][0]
+    corr_len_value = float(corr_len_line.split()[-1])   # Extract the numerical value from the line
+
+    return diff_abs_value, corr_len_value
