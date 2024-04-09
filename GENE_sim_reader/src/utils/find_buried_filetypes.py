@@ -36,7 +36,7 @@ def count_files_in_dir(directory: str, filetype: str) -> int:
 
 
 
-def find_buried_filetypes(input_filepath, filetype:str='parameters', max_depth: int = 3):
+def find_buried_filetypes(input_filepath, filetype:str='parameters', max_depth:int=3, smart_param_append:bool=True):
     """
     Finds files of a specific type buried within a directory structure up to a specified depth.
 
@@ -94,7 +94,7 @@ def find_buried_filetypes(input_filepath, filetype:str='parameters', max_depth: 
                     
                     #change filetype to be added (parameters vs parameters_) if multiple filetypes are found
                     #this is only necessary for parameters files which can be input "parameters" or output "parameters_"
-                    if count_files_in_dir(root, filetype) > 1:
+                    if (count_files_in_dir(root, filetype) > 1) and smart_param_append:
                         modifier = '_'
                     else:
                         modifier = ''
