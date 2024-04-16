@@ -101,6 +101,10 @@ def find_buried_filetypes(input_filepath, filetype: str='parameters', max_depth:
                     
                     # Check if the file starts with the specified filetype
                     if file.startswith(filetype + modifier):
+                        # Skip the current file if the filetype is 'parameters' and no file starts with 'omega'
+                        if filetype == 'parameters' and not any(f.startswith('omega') for f in files):
+                            continue
+                        
                         filetype_path = os.path.join(root, file)
                         filetype_files.append(filetype_path)
 
