@@ -12,19 +12,18 @@ n_procs_y = 1
 n_procs_z = 32
 n_procs_sim = 256
 
-n_parallel_sims = 18
+n_parallel_sims  = 48
 /
 
 &box
-theta0 = 0 !scanlist: 10, 20
 n_spec =   3   !
 nx0    =   7  !usually 128 will be enough for nonlinear runs,but if the heat flux spectrum shows the heat flux does not approach zero at large kx, then you need more
 nky0   =   1  ! 1 for linear runs. Nonzero for nonlinear runs. This depends on the linear simulations, larger number if the spectrum is wide
-nz0     = 3
-nv0    =   36 !scanlist: 1, 2, 3 !
+nz0     = 1
+nv0    =   36 !scanlist: 3, 1, 2, 4 !
 nw0    =   8    ! 8 is usually fine, but 16 is better if nky and nx are large
 
-kymin = 0.2
+kymin = 0.2 !scanlist: 20, 30, 40, 4
 
 lv    =   3.00000   !
 lw    =   9.00000   !
@@ -86,11 +85,12 @@ hyp_v =   0.2000
 
 
 &geometry
+theta0 = 0 !scanlist: 10, 20, 34
 magn_geometry = 'tracer_efit'  !PY: tracer_efit reads the geometry info from an efit file.
 
 
 geomdir = '/global/homes/j/joeschm/data/ST_research/NSTXU_discharges/132588/'
-geomfile = 'g132588.00650'
+geomfile  = 'g3'
 
 !PY: edge_opt redistributes the z grid points more densely around the outboard midplane.  You should play around to find optimal values here.
 edge_opt =   4.0000000
@@ -122,7 +122,6 @@ prof_type = -2   !PY: -2 reads info from an iterdb file
 
 
 &units
-kyminy = 0 !scanlist: 20, 30, 40
 Bref =   -1    !PY: read from file
 Tref =   -1
 nref =   -1

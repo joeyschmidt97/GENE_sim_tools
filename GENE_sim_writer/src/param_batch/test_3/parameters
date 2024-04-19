@@ -19,7 +19,7 @@ n_parallel_sims  = 48
 n_spec =   3   !
 nx0    =   7  !usually 128 will be enough for nonlinear runs,but if the heat flux spectrum shows the heat flux does not approach zero at large kx, then you need more
 nky0   =   1  ! 1 for linear runs. Nonzero for nonlinear runs. This depends on the linear simulations, larger number if the spectrum is wide
-nz0     = 1
+nz0     = 2
 nv0    =   36 !scanlist: 3, 1, 2, 4 !
 nw0    =   8    ! 8 is usually fine, but 16 is better if nky and nx are large
 
@@ -90,7 +90,7 @@ magn_geometry = 'tracer_efit'  !PY: tracer_efit reads the geometry info from an 
 
 
 geomdir = '/global/homes/j/joeschm/data/ST_research/NSTXU_discharges/132588/'
-geomfile  = 'g2'
+geomfile  = 'g1'
 
 !PY: edge_opt redistributes the z grid points more densely around the outboard midplane.  You should play around to find optimal values here.
 edge_opt =   4.0000000
