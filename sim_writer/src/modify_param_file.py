@@ -1,6 +1,9 @@
 import os
 import itertools
+import shutil
 
+
+GENE_path = '/global/homes/j/joeschm/tools/GENE'
 
 
 ######################################################################
@@ -31,10 +34,13 @@ def read_clean_file(param_filepath):
 
 
 
-def write_file(file_content, i:int=0):
-    dir_name = f"param_batch/parameter_{i}"
-    if not os.path.exists(dir_name):
-        os.makedirs(dir_name)
+def write_file(file_content, batch_directory, i:int=0):
+
+    param_sub_folder = f"parameter_{i}"
+
+    dir_name = os.path.join(batch_directory, param_sub_folder)
+    os.makedirs(dir_name)
+    
     file_path = os.path.join(dir_name, 'parameters')
     with open(file_path, 'w') as file:
         file.write(file_content)
@@ -63,7 +69,6 @@ def convert_type(var_value):
 
 def change_var_value(file_content, input_string, value):
     lines = file_content.split('\n')
-    
     
     if isinstance(value, str):
         value = f"'{value}'"
@@ -100,8 +105,8 @@ def append_scan_line(file_content, input_string, values, scan_type='scanlist'):
     scan_added = False
     processed_lines = []
 
-    if scan_type not in ['!scanlist', '!scan']:
-        raise ValueError("Invalid scan type. Choose either !scanlist or !scan")
+    if scan_type not in ['scanlist', 'scan']:
+        raise ValueError("Invalid scan type. Choose either 'scanlist' or 'scan'.")
 
 
     if not scan_type.startswith('!'):
@@ -187,6 +192,7 @@ def create_new_scan_line(file_content, input_string, values, scan_type='!scanlis
 
 
 def get_parallel_sim(parallel_sim, scan_type, key, value):
+    
     if scan_type == 'scanlist':
         parallel_sim *= len(value['values'])
     elif scan_type == 'scan':
@@ -213,14 +219,13 @@ def create_param_scan_matrix(scan_dict, scan_type, auto_name_diagdir_path=None, 
     for key, value in scan_dict.items():
         split_param_bool = value.get('split_param', False)
 
-        if split_param_bool:
+        if split_param_bool or len(value['values']) == 1:
             ind_param_names.append(key)
             ind_param_values.append(value['values'])
         else:
             param_scan_dict[key] = value['values']
             parallel_sim = get_parallel_sim(parallel_sim, scan_type, key, value)
             
-
 
     
     # Create a list of dictionaries, where each dictionary represents a point in the matrix
@@ -242,15 +247,7 @@ def create_param_scan_matrix(scan_dict, scan_type, auto_name_diagdir_path=None, 
 
 
     if param_file_values_list[0] == {}:
-        param_file_values_list = []
-
-    if debug:
-        print(len(param_file_values_list))
-        print("Adding scan parameters for:", '\n',  param_scan_dict, '\n')
-
-        for dict_param in param_file_values_list:
-            print("Changing param values:", dict_param)
-            
+        param_file_values_list = []      
 
 
     return param_file_values_list, param_scan_dict
@@ -272,8 +269,7 @@ def create_unique_param_file(param_file_contents, param_file_dict, param_scan_di
 
         if not scan_added:
             param_file_contents, section_ind_dict = create_new_scan_line(param_file_contents, key, values, scan_type=scan_type, section_ind_dict=section_ind_dict)
-            print(section_ind_dict)  # Debugging output
-
+            
     # Modify the parameter values individually
     for key, value in param_file_dict.items():
         param_file_contents = change_var_value(param_file_contents, key, value)
@@ -289,11 +285,37 @@ def create_batch_param_files(param_path, scan_dict, scan_type, auto_name_diagdir
     param_file_values_list, param_scan_dict = create_param_scan_matrix(scan_dict, scan_type, auto_name_diagdir_path, debug)
 
     section_ind_dict = None  # Initialize if not provided
+    batch_suffix = input("Enter the batch suffix: ")
+
+    batch_directory = os.path.join(GENE_path, f'{batch_suffix}_parameter_batch')
+    if os.path.exists(batch_directory):
+        # Remove the existing directory with all its contents
+        shutil.rmtree(batch_directory)
+    os.makedirs(batch_directory)
+
+
+    scan_type = scan_type.replace('!', '')
 
     for ind, param_file_dict in enumerate(param_file_values_list):
         mod_param_file, section_ind_dict = create_unique_param_file(original_param_file, param_file_dict, param_scan_dict, scan_type, section_ind_dict=section_ind_dict)
 
-        write_file(mod_param_file, i=ind)
+        write_file(mod_param_file, batch_directory=batch_directory, i=ind)
+    
+    
+    
+
+    # File path where the text will be saved
+    file_path = os.path.join(batch_directory, 'parameters_info.txt')
+    print(f'Created batch parameter files at {batch_directory}.')
+
+    # Open the file in write mode
+    with open(file_path, 'w') as file:
+        file.write("Adding scan parameters for:\n")
+        file.write(str(param_scan_dict) + "\n\n")  # Convert the dictionary to string before writing
+        
+        for ind, dict_param in enumerate(param_file_values_list):
+            file.write(f"Changing param values for parameters_{ind}: {dict_param}\n")
+
 
 
 
